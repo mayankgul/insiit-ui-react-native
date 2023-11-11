@@ -11,7 +11,7 @@ import { StackActions, useNavigation } from "@react-navigation/native";
 
 WebBrowser.maybeCompleteAuthSession();
 
-export const Welcome = () => {
+export const WelcomeScreen = () => {
   const navigation = useNavigation();
 
   const [userInfo, setUserInfo] = useState<any>(null);
@@ -30,9 +30,7 @@ export const Welcome = () => {
     };
 
     const navigateHome = () => {
-      navigation.dispatch(
-        StackActions.replace("Home", { name: userInfo.name })
-      );
+      navigation.dispatch(StackActions.replace("TabNav"));
     };
 
     if (userInfo !== null) {

@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
-  container: { backgroundColor: "#ffffff", flex: 1 },
+  container: { backgroundColor: "#ffffff", flex: 1, paddingTop: 70 },
   image: {
     width: 300,
     height: 300,
@@ -16,18 +16,18 @@ export const styles = StyleSheet.create({
   title: {
     fontSize: 35,
     fontWeight: "bold",
-    fontFamily: "Roboto",
+    // fontFamily: "Roboto",
   },
   subtitle: {
     fontSize: 20,
     marginTop: 10,
-    fontFamily: "Roboto",
+    // fontFamily: "Roboto",
     fontStyle: "italic",
   },
   text: {
     fontSize: 15,
     marginTop: 10,
-    fontFamily: "Roboto",
+    // fontFamily: "Roboto",
   },
   buttonContainer: {
     marginTop: 40,
@@ -39,14 +39,14 @@ export const styles = StyleSheet.create({
   },
   loginButtonText: {
     fontSize: 15,
-    fontFamily: "Roboto",
+    // fontFamily: "Roboto",
   },
   skipButton: {
     marginTop: 10,
   },
   skipButtonText: {
     fontSize: 13,
-    fontFamily: "Roboto",
+    // fontFamily: "Roboto",
     // textDecorationLine: "underline",
   },
 });
