@@ -22,6 +22,7 @@ import { BusScreen } from "./screens/BusScreen";
 import { MapScreen } from "./screens/MapScreen";
 import { MiscScreen } from "./screens/MiscScreen";
 import { OutletScreen } from "./screens/OutletScreen";
+import { SplashScreen } from "./screens/SplashScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
@@ -62,23 +63,29 @@ export default function App() {
   //   return null;
   // }
 
-  const [user, setUser] = useState<user | null>(null);
+  const [page, setPage] = useState<string>("Welcome");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     AsyncStorage.getItem(USER_LOCAL_STORAGE).then((data) => {
       if (data) {
-        setUser(JSON.parse(data));
+        setPage("TabNav");
       }
+      setLoading(false);
     });
   }, []);
+
+  console.log(page);
+
+  if (loading) {
+    return <SplashScreen />;
+  }
 
   return (
     <NavigationContainer>
       <PaperProvider>
         <View style={styles.container}>
-          <Stack.Navigator
-            initialRouteName={user !== null ? "Home" : "Welcome"}
-          >
+          <Stack.Navigator initialRouteName={page}>
             <Stack.Screen
               name="Welcome"
               component={WelcomeScreen}

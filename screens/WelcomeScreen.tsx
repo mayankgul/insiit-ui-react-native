@@ -15,6 +15,7 @@ export const WelcomeScreen = () => {
   const navigation = useNavigation();
 
   const [userInfo, setUserInfo] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId:
@@ -85,7 +86,9 @@ export const WelcomeScreen = () => {
           textColor="#000000"
           onPress={() => {
             promptAsync();
+            setLoading(true);
           }}
+          loading={loading}
         >
           <Text style={welcomeStyles.loginButtonText}>Sign In with Google</Text>
         </Button>

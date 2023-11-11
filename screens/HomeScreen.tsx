@@ -43,16 +43,6 @@ export const HomeScreen = () => {
           <Icon source="arrow-right" size={25} />
         </View>
       </Pressable>
-
-      {/* <Button
-        mode="contained"
-        onPress={async () => {
-          await AsyncStorage.removeItem(USER_LOCAL_STORAGE);
-          navigation.dispatch(StackActions.replace("Welcome"));
-        }}
-      >
-        Logout
-      </Button> */}
     </ScrollView>
   );
 };
