@@ -1,5 +1,5 @@
 import { View, Text, Image } from "react-native";
-import { Button } from "react-native-paper";
+import { Button, Snackbar } from "react-native-paper";
 import { styles as welcomeStyles } from "../styles/welcomeStyles";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
@@ -16,6 +16,7 @@ export const WelcomeScreen = () => {
 
   const [userInfo, setUserInfo] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [visible, setVisible] = useState(false);
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId:
@@ -35,8 +36,12 @@ export const WelcomeScreen = () => {
     };
 
     if (userInfo !== null) {
-      updateStorage();
-      navigateHome();
+      setVisible(true);
+      setTimeout(() => {
+        setVisible(false);
+        updateStorage();
+        navigateHome();
+      }, 1000);
     }
   }, [userInfo]);
 
@@ -97,10 +102,19 @@ export const WelcomeScreen = () => {
           mode="text"
           textColor="#626262"
           style={welcomeStyles.skipButton}
+          onPress={() => {
+            navigation.dispatch(StackActions.replace("TabNav"));
+          }}
         >
           <Text style={welcomeStyles.skipButtonText}>SKIP</Text>
         </Button>
       </View>
+
+      <Snackbar visible={visible} onDismiss={() => setVisible(false)}>
+        <Text style={{ color: "#ffffff" }}>
+          Authenticated as {userInfo?.email}
+        </Text>
+      </Snackbar>
     </View>
   );
 };

@@ -5,6 +5,5 @@ export const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row-reverse",
     marginTop: 10,
-    marginBottom: 30,
   },
 });

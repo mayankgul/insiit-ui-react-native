@@ -4,6 +4,8 @@ import { MessMenuScreen } from "../screens/MessMenuScreen";
 import { MessQRScreen } from "../screens/MessQRScreen";
 import { NotificationScreen } from "../screens/NotificationScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
+import { TopBar } from "../components/TopBar";
+import { BusScreen } from "../screens/BusScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -13,19 +15,58 @@ export const HomeStack = () => {
       <Stack.Screen
         name="Home"
         component={HomeScreen}
-        options={{ headerShown: false }}
+        options={{
+          headerRight: (_) => {
+            return <TopBar />;
+          },
+          headerShadowVisible: false,
+          headerTitle: "",
+        }}
       />
       <Stack.Screen
         name="MessQR"
         component={MessQRScreen}
-        options={{ headerTitle: "View Mess QR" }}
+        options={{
+          headerTitle: "View Mess QR",
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
       />
-      <Stack.Screen name="Notifications" component={NotificationScreen} />
-      <Stack.Screen name="Profile" component={ProfileScreen} />
+      <Stack.Screen
+        name="Notifications"
+        component={NotificationScreen}
+        options={{
+          headerTitle: "Notifications",
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
+      />
+      <Stack.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          headerTitle: "Your Profile",
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
+      />
       <Stack.Screen
         name="MessMenu"
         component={MessMenuScreen}
-        options={{ headerTitle: "Mess Menu" }}
+        options={{
+          headerTitle: "Mess Menu",
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
+      />
+      <Stack.Screen
+        name="Bus"
+        component={BusScreen}
+        options={{
+          headerTitle: "Bus Schedule",
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
       />
     </Stack.Navigator>
   );

@@ -7,9 +7,11 @@ export const MessQRScreen = () => {
   const [email, setEmail] = useState(null);
 
   useEffect(() => {
-    AsyncStorage.getItem(USER_LOCAL_STORAGE).then((value) =>
-      setEmail(JSON.parse(value).email)
-    );
+    AsyncStorage.getItem(USER_LOCAL_STORAGE).then((value) => {
+      if (value) {
+        setEmail(JSON.parse(value).email);
+      }
+    });
   }, []);
 
   return (

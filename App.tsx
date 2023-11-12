@@ -11,7 +11,6 @@ import {
   createNavigationContainerRef,
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { HomeTopBar } from "./components/HomeTopBar";
 import { MessQRScreen } from "./screens/MessQRScreen";
 import { NotificationScreen } from "./screens/NotificationScreen";
 import { ProfileScreen } from "./screens/ProfileScreen";
@@ -23,31 +22,45 @@ import { MapScreen } from "./screens/MapScreen";
 import { MiscScreen } from "./screens/MiscScreen";
 import { OutletScreen } from "./screens/OutletScreen";
 import { SplashScreen } from "./screens/SplashScreen";
+import { MessStack } from "./stacks/MessStack";
+import { OutletStack } from "./stacks/OutletStack";
+import { MiscStack } from "./stacks/MiscStack";
 
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
 
 const TabNav = () => {
   return (
-    <Tab.Navigator initialRouteName="HomeTab">
+    <Tab.Navigator
+      initialRouteName="HomeTab"
+      barStyle={{ backgroundColor: "#fffbfe" }}
+    >
       <Tab.Screen
         name="HomeTab"
         component={HomeStack}
-        options={{ tabBarLabel: "Home", tabBarIcon: "home" }}
+        options={{
+          tabBarLabel: "Home",
+          tabBarIcon: "home",
+        }}
       />
       <Tab.Screen
-        name="BusTab"
-        component={BusScreen}
-        options={{ tabBarLabel: "Bus", tabBarIcon: "bus" }}
+        name="MessTab"
+        component={MessStack}
+        options={{ tabBarLabel: "Mess", tabBarIcon: "silverware-fork-knife" }}
       />
       <Tab.Screen
         name="OutletsTab"
-        component={OutletScreen}
+        component={OutletStack}
         options={{ tabBarLabel: "Outlets", tabBarIcon: "food" }}
       />
+      {/* <Tab.Screen
+        name="BusTab"
+        component={BusScreen}
+        options={{ tabBarLabel: "Bus", tabBarIcon: "bus" }}
+      /> */}
       <Tab.Screen
         name="MiscTab"
-        component={MiscScreen}
+        component={MiscStack}
         options={{ tabBarLabel: "More", tabBarIcon: "dots-horizontal" }}
       />
     </Tab.Navigator>
@@ -74,8 +87,6 @@ export default function App() {
       setLoading(false);
     });
   }, []);
-
-  console.log(page);
 
   if (loading) {
     return <SplashScreen />;
