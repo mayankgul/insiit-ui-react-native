@@ -1,108 +1,77 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
 import { WelcomeScreen } from "./screens/WelcomeScreen";
-import { useFonts } from "expo-font";
-import { Icon, PaperProvider } from "react-native-paper";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { USER_LOCAL_STORAGE, user } from "./models/globals";
+// import { useFonts } from "expo-font";
+import { PaperProvider } from "react-native-paper";
 import { useEffect, useState } from "react";
-import {
-  NavigationContainer,
-  createNavigationContainerRef,
-} from "@react-navigation/native";
+import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { HomeTopBar } from "./components/HomeTopBar";
-import { MessQRScreen } from "./screens/MessQRScreen";
-import { NotificationScreen } from "./screens/NotificationScreen";
-import { ProfileScreen } from "./screens/ProfileScreen";
-import { MessMenuScreen } from "./screens/MessMenuScreen";
-import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
-import { HomeStack } from "./stacks/HomeStack";
-import { BusScreen } from "./screens/BusScreen";
-import { MapScreen } from "./screens/MapScreen";
-import { MiscScreen } from "./screens/MiscScreen";
-import { OutletScreen } from "./screens/OutletScreen";
 import { SplashScreen } from "./screens/SplashScreen";
+import { useAppDispatch, useAppSelector } from "./services/app/hooks";
+import { ErrorScreen } from "./screens/ErrorScreen";
+import { Provider as ReduxProvider } from "react-redux";
+import store from "./services/app/store";
+import { TabNav } from "./components/TabNav";
+import { getUserStorage } from "./services/app/features/user";
 
 const Stack = createNativeStackNavigator();
-const Tab = createMaterialBottomTabNavigator();
 
-const TabNav = () => {
-  return (
-    <Tab.Navigator initialRouteName="HomeTab">
-      <Tab.Screen
-        name="HomeTab"
-        component={HomeStack}
-        options={{ tabBarLabel: "Home", tabBarIcon: "home" }}
-      />
-      <Tab.Screen
-        name="BusTab"
-        component={BusScreen}
-        options={{ tabBarLabel: "Bus", tabBarIcon: "bus" }}
-      />
-      <Tab.Screen
-        name="OutletsTab"
-        component={OutletScreen}
-        options={{ tabBarLabel: "Outlets", tabBarIcon: "food" }}
-      />
-      <Tab.Screen
-        name="MiscTab"
-        component={MiscScreen}
-        options={{ tabBarLabel: "More", tabBarIcon: "dots-horizontal" }}
-      />
-    </Tab.Navigator>
-  );
-};
+const App = () => {
+  // const [loaded] = useFonts({
+  //   Roboto: require("./assets/fonts/Roboto-Regular.ttf"),
+  // });
 
-export default function App() {
-  const [loaded] = useFonts({
-    Roboto: require("./assets/fonts/Roboto-Regular.ttf"),
-  });
-
-  // if (!loaded) {
-  //   return null;
-  // }
-
-  const [page, setPage] = useState<string>("Welcome");
+  const [page, setPage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const userData = useAppSelector((state) => state.user);
+  const dispatch = useAppDispatch();
+
   useEffect(() => {
-    AsyncStorage.getItem(USER_LOCAL_STORAGE).then((data) => {
-      if (data) {
-        setPage("TabNav");
-      }
-      setLoading(false);
-    });
+    dispatch(getUserStorage());
   }, []);
 
-  console.log(page);
+  useEffect(() => {
+    if (userData.loading !== null) {
+      if (userData.loading) {
+        setLoading(true);
+      } else {
+        setLoading(false);
+        if (userData.user !== null) {
+          setPage("TabNav");
+        } else {
+          setPage("Welcome");
+        }
+      }
+    }
+  }, [userData]);
 
   if (loading) {
     return <SplashScreen />;
   }
 
+  if (userData.error !== null) {
+    return <ErrorScreen error={userData.error} />;
+  }
+
   return (
-    <NavigationContainer>
-      <PaperProvider>
-        <View style={styles.container}>
-          <Stack.Navigator initialRouteName={page}>
-            <Stack.Screen
-              name="Welcome"
-              component={WelcomeScreen}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="TabNav"
-              component={TabNav}
-              options={{ headerShown: false }}
-            />
-          </Stack.Navigator>
-          <StatusBar style="dark" />
-        </View>
-      </PaperProvider>
-    </NavigationContainer>
+    <View style={styles.container}>
+      <Stack.Navigator initialRouteName={page}>
+        <Stack.Screen
+          name="Welcome"
+          component={WelcomeScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="TabNav"
+          component={TabNav}
+          options={{ headerShown: false }}
+        />
+      </Stack.Navigator>
+      <StatusBar style="auto" />
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -110,3 +79,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
 });
+
+const AppWrapper = () => {
+  return (
+    <ReduxProvider store={store}>
+      <NavigationContainer>
+        <PaperProvider>
+          <App />
+        </PaperProvider>
+      </NavigationContainer>
+    </ReduxProvider>
+  );
+};
+
+export default AppWrapper;

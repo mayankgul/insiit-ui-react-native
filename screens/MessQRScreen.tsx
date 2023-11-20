@@ -1,28 +1,48 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { View, Text } from "react-native";
-import { USER_LOCAL_STORAGE } from "../models/globals";
-import { useState, useEffect } from "react";
+import { ScrollView, StyleSheet } from "react-native";
+import { useAppDispatch, useAppSelector } from "../services/app/hooks";
+import { SplashScreen } from "./SplashScreen";
+import { MessQrSignIn } from "../components/MessQrSignIn";
+import { MessQrDisplay } from "../components/messQrDisplay";
+import { MessQrProfile } from "../components/messQrProfile";
+import { useEffect } from "react";
+import { getMessQrStorage } from "../services/app/features/mess";
 
 export const MessQRScreen = () => {
-  const [email, setEmail] = useState(null);
+  const dispatch = useAppDispatch();
+  const messQrData = useAppSelector((state) => state.messQr);
 
   useEffect(() => {
-    AsyncStorage.getItem(USER_LOCAL_STORAGE).then((value) =>
-      setEmail(JSON.parse(value).email)
-    );
+    dispatch(getMessQrStorage());
   }, []);
 
-  return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: "#ffffff",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <Text>Mess QR Screen</Text>
-      <Text>{email}</Text>
-    </View>
-  );
+  if (messQrData.loading) {
+    return <SplashScreen />;
+  }
+
+  if (messQrData.order_id !== null) {
+    return (
+      <ScrollView
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.container}
+      >
+        <MessQrDisplay
+          order_id={messQrData.order_id}
+          mess_name={messQrData.mess_name}
+        />
+
+        <MessQrProfile />
+      </ScrollView>
+    );
+  }
+
+  return <MessQrSignIn />;
 };
+
+const styles = StyleSheet.create({
+  scrollContainer: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+    paddingTop: "8%",
+  },
+  container: { alignItems: "center" },
+});
