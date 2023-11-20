@@ -2,13 +2,35 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_GOOGLE_SIGNIN_ANDROID_CLIENT_ID": "881936870792-9bfq1rka70e49p2etc4m9grovr3oeu98.apps.googleusercontent.com",
+        "EXPO_PUBLIC_PATH_TO_USER_LOCAL_STORAGE": "@insiit/user",
+        "EXPO_PUBLIC_PATH_TO_MESS_LOCAL_STORAGE": "@insiit/mess",
+        "EXPO_PUBLIC_PATH_TO_MESS_QR_LOCALSTORAGE": "@insiit/mess/qr",
+        "EXPO_PUBLIC_API_BASE_URL": "http://10.240.5.69:8000"
+      }
     },
     "preview": {
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_GOOGLE_SIGNIN_ANDROID_CLIENT_ID": "881936870792-9bfq1rka70e49p2etc4m9grovr3oeu98.apps.googleusercontent.com",
+        "EXPO_PUBLIC_PATH_TO_USER_LOCAL_STORAGE": "@insiit/user",
+        "EXPO_PUBLIC_PATH_TO_MESS_LOCAL_STORAGE": "@insiit/mess",
+        "EXPO_PUBLIC_PATH_TO_MESS_QR_LOCALSTORAGE": "@insiit/mess/qr",
+        "EXPO_PUBLIC_API_BASE_URL": "http://10.240.5.69:8000"
       }
     },
-    "production": {}
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_GOOGLE_SIGNIN_ANDROID_CLIENT_ID": "881936870792-9bfq1rka70e49p2etc4m9grovr3oeu98.apps.googleusercontent.com",
+        "EXPO_PUBLIC_PATH_TO_USER_LOCAL_STORAGE": "@insiit/user",
+        "EXPO_PUBLIC_PATH_TO_MESS_LOCAL_STORAGE": "@insiit/mess",
+        "EXPO_PUBLIC_PATH_TO_MESS_QR_LOCALSTORAGE": "@insiit/mess/qr",
+        "EXPO_PUBLIC_API_BASE_URL": "http://10.240.5.69:8000"
+      }
+    }
   }
 }

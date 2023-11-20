@@ -1,16 +1,12 @@
-import { View, Text, Image } from "react-native";
-import { styles as barStyles } from "../styles/topBarStyles";
+import { View, StyleSheet, Image } from "react-native";
 import { Icon, IconButton } from "react-native-paper";
-import { useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { USER_LOCAL_STORAGE } from "../models/globals";
 import { StackActions, useNavigation } from "@react-navigation/native";
 
 export const TopBar = () => {
   const navigation = useNavigation();
 
   return (
-    <View style={barStyles.container}>
+    <View style={styles.container}>
       <IconButton
         icon="account-circle-outline"
         onPress={() => {
@@ -33,11 +29,14 @@ export const TopBar = () => {
             <View
               style={{
                 backgroundColor: "#cfdaff",
-                // padding: 1,
+                padding: 2,
                 borderRadius: 5,
               }}
             >
-              <Icon source="qrcode" size={30} />
+              <Image
+                source={require("../assets/qr-code-icon.png")}
+                style={{ width: size + 2, height: size + 2 }}
+              />
             </View>
           );
         }}
@@ -50,3 +49,11 @@ export const TopBar = () => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: "row-reverse",
+    marginTop: 10,
+  },
+});

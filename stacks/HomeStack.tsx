@@ -6,6 +6,7 @@ import { NotificationScreen } from "../screens/NotificationScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
 import { TopBar } from "../components/TopBar";
 import { BusScreen } from "../screens/BusScreen";
+import { MessForgotPasswordScreen } from "../screens/messForgotPasswordScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -28,6 +29,15 @@ export const HomeStack = () => {
         component={MessQRScreen}
         options={{
           headerTitle: "View Mess QR",
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
+      />
+      <Stack.Screen
+        name="MessForgotPassword"
+        component={MessForgotPasswordScreen}
+        options={{
+          headerTitle: "Reset Password",
           headerShadowVisible: false,
           headerTitleAlign: "center",
         }}

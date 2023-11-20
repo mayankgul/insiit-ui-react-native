@@ -1,55 +1,158 @@
-import { ScrollView, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { useState, useEffect } from "react";
-import { API_BASE_URL, MESS_LOCAL_STORAGE, days } from "../models/globals";
+import { API_BASE_URL } from "../models/constants";
 import { SplashScreen } from "./SplashScreen";
-import { Card, List, Avatar, Icon, Button } from "react-native-paper";
-import { MessMenuItemCard } from "../components/MessMenuItemCard";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Button } from "react-native-paper";
 import axios from "axios";
+import { useAppDispatch, useAppSelector } from "../services/app/hooks";
+import { getMessStorage, setMessStorage } from "../services/app/features/mess";
+import { Mess, MessTimings } from "../models/mess.model";
+import { DayMessMenuDisplay } from "../components/dayMessMenuDisplay";
 
 const Tab = createMaterialTopTabNavigator();
 
+const days = {
+  0: "sunday",
+  1: "monday",
+  2: "tuesday",
+  3: "wednesday",
+  4: "thursday",
+  5: "friday",
+  6: "saturday",
+};
+
 export const MessMenuScreen = () => {
-  const [day, setDay] = useState("Monday");
-  const [loaded, setLoaded] = useState(false);
-  const [mess, setMess] = useState(null);
-  const [messes, setMesses] = useState([]);
+  const dispatch = useAppDispatch();
+
+  const mess = useAppSelector((state) => state.mess);
+
+  const [day, setDay] = useState<
+    | "monday"
+    | "tuesday"
+    | "wednesday"
+    | "thursday"
+    | "friday"
+    | "saturday"
+    | "sunday"
+  >("monday");
+
+  const [messes, setMesses] = useState<Mess[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const date = new Date();
     const today = date.getDay();
     setDay(days[today]);
 
-    AsyncStorage.getItem(MESS_LOCAL_STORAGE).then((value) => {
-      if (value) {
-        setMess(parseInt(value));
-        setLoaded(true);
-      } else {
-        axios({ method: "GET", url: `${API_BASE_URL}/mess` })
-          .then((res) => {
-            res.data.messes.map((mess) =>
-              setMesses((messes) => [
-                ...messes,
-                { id: mess.id, name: mess.name },
-              ])
-            );
-            setLoaded(true);
-          })
-          .catch((err) => {
-            console.log(err);
-            setMesses(null);
-            setLoaded(true);
-          });
-      }
-    });
+    dispatch(getMessStorage());
   }, []);
 
-  if (!loaded) {
+  useEffect(() => {
+    if (mess.loading === false) {
+      if (mess.id === null) {
+        setLoading(true);
+        axios({
+          method: "GET",
+          url: `${API_BASE_URL}/mess`,
+        })
+          .then((res) => {
+            setMesses(res.data.messes);
+            setLoading(false);
+          })
+          .catch((err) => {
+            setError(err.message);
+            setLoading(false);
+            console.log(err.message);
+          });
+      }
+    }
+  }, [mess.loading]);
+
+  /**
+   * Returns ID (1, 2, 3 or 4) corresponding to current meal according to local time
+   * @param  {MessTimings} timings The timings object
+   * @return {number}              ID corresponding to current meal
+   */
+  const computeCurrentMealId = (timings: MessTimings): 1 | 2 | 3 | 4 => {
+    const current = new Date();
+
+    const breakfastStartTime = new Date(
+      current.getFullYear(),
+      current.getMonth(),
+      current.getDate(),
+      parseInt(timings.breakfast.start.split(":")[0]),
+      parseInt(timings.breakfast.start.split(":")[1])
+    );
+    const breakfastEndTime = new Date(
+      current.getFullYear(),
+      current.getMonth(),
+      current.getDate(),
+      parseInt(timings.breakfast.end.split(":")[0]),
+      parseInt(timings.breakfast.end.split(":")[1])
+    );
+
+    const lunchStartTime = new Date(
+      current.getFullYear(),
+      current.getMonth(),
+      current.getDate(),
+      parseInt(timings.lunch.start.split(":")[0]),
+      parseInt(timings.lunch.start.split(":")[1])
+    );
+    const lunchEndTime = new Date(
+      current.getFullYear(),
+      current.getMonth(),
+      current.getDate(),
+      parseInt(timings.lunch.end.split(":")[0]),
+      parseInt(timings.lunch.end.split(":")[1])
+    );
+
+    const snacksStartTime = new Date(
+      current.getFullYear(),
+      current.getMonth(),
+      current.getDate(),
+      parseInt(timings.snacks.start.split(":")[0]),
+      parseInt(timings.snacks.start.split(":")[1])
+    );
+    const snacksEndTime = new Date(
+      current.getFullYear(),
+      current.getMonth(),
+      current.getDate(),
+      parseInt(timings.snacks.end.split(":")[0]),
+      parseInt(timings.snacks.end.split(":")[1])
+    );
+
+    const dinnerStartTime = new Date(
+      current.getFullYear(),
+      current.getMonth(),
+      current.getDate(),
+      parseInt(timings.dinner.start.split(":")[0]),
+      parseInt(timings.dinner.start.split(":")[1])
+    );
+    const dinnerEndTime = new Date(
+      current.getFullYear(),
+      current.getMonth(),
+      current.getDate(),
+      parseInt(timings.dinner.end.split(":")[0]),
+      parseInt(timings.dinner.end.split(":")[1])
+    );
+
+    if (current >= breakfastStartTime && current <= breakfastEndTime) return 1;
+    if (current >= lunchStartTime && current <= lunchEndTime) return 2;
+    if (current >= snacksStartTime && current <= snacksEndTime) return 3;
+    if (current >= dinnerStartTime && current <= dinnerEndTime) return 4;
+    if (current >= breakfastEndTime && current <= lunchStartTime) return 2;
+    if (current >= lunchEndTime && current <= snacksStartTime) return 3;
+    if (current >= snacksEndTime && current <= dinnerStartTime) return 4;
+    if (current >= dinnerEndTime && current <= breakfastStartTime) return 1;
+  };
+
+  if (loading || mess.loading) {
     return <SplashScreen />;
   }
 
-  if (mess === null) {
+  if (mess.id === null) {
     return (
       <View
         style={{
@@ -69,17 +172,7 @@ export const MessMenuScreen = () => {
               textColor="#000000"
               mode="outlined"
               style={{ width: "60%", marginBottom: 10 }}
-              onPress={() => {
-                setLoaded(false);
-                AsyncStorage.setItem(
-                  MESS_LOCAL_STORAGE,
-                  JSON.stringify(mess.id)
-                ).then(() => {
-                  setMess(mess.id);
-                  setMesses(null);
-                  setLoaded(true);
-                });
-              }}
+              onPress={() => dispatch(setMessStorage(mess))}
             >
               <Text style={{ fontSize: 17 }}>{mess.name}</Text>
             </Button>
@@ -90,105 +183,90 @@ export const MessMenuScreen = () => {
   }
 
   return (
-    <Tab.Navigator backBehavior="none" initialRouteName={`${day}Menu`}>
-      <Tab.Screen name="MondayMenu" options={{ title: "M" }}>
-        {() => <DayMessMenu day="monday" />}
-      </Tab.Screen>
-      <Tab.Screen name="TuesdayMenu" options={{ title: "T" }}>
-        {() => <DayMessMenu day="tuesday" />}
-      </Tab.Screen>
-      <Tab.Screen name="WednesdayMenu" options={{ title: "W" }}>
-        {() => <DayMessMenu day="wednesday" />}
-      </Tab.Screen>
-      <Tab.Screen name="ThursdayMenu" options={{ title: "Th" }}>
-        {() => <DayMessMenu day="thursday" />}
-      </Tab.Screen>
-      <Tab.Screen name="FridayMenu" options={{ title: "F" }}>
-        {() => <DayMessMenu day="friday" />}
-      </Tab.Screen>
-      <Tab.Screen name="SaturdayMenu" options={{ title: "S" }}>
-        {() => <DayMessMenu day="saturday" />}
-      </Tab.Screen>
-      <Tab.Screen name="SundayMenu" options={{ title: "S" }}>
-        {() => <DayMessMenu day="sunday" />}
-      </Tab.Screen>
-    </Tab.Navigator>
-  );
-};
-
-const DayMessMenu = ({
-  day,
-}: {
-  day:
-    | "monday"
-    | "tuesday"
-    | "wednesday"
-    | "thursday"
-    | "friday"
-    | "saturday"
-    | "sunday";
-}) => {
-  const [menu, setMenu] = useState(null);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    setLoaded(true);
-  }, []);
-
-  if (!loaded) {
-    return <SplashScreen />;
-  }
-
-  return (
-    <ScrollView
-      style={{
-        flex: 1,
-        backgroundColor: "#ffffff",
-        // alignItems: "center",
-        // justifyContent: "center",
-      }}
-    >
-      <List.AccordionGroup>
-        <List.Accordion title="Breakfast" id={1}>
-          <List.Item
-            title={() => {
-              return (
-                <View>
-                  <MessMenuItemCard
-                    name="Aloo Onion Paratha"
-                    image="https://avatars.githubusercontent.com/u/146699003?s=20006&v=4"
-                  />
-                  <MessMenuItemCard
-                    name="Aloo Onion Paratha"
-                    image="https://avatars.githubusercontent.com/u/146699003?s=20006&v=4"
-                  />
-                  <MessMenuItemCard
-                    name="Aloo Onion Paratha"
-                    image="https://avatars.githubusercontent.com/u/146699003?s=20006&v=4"
-                  />
-                  <MessMenuItemCard
-                    name="Aloo Onion Paratha"
-                    image="https://avatars.githubusercontent.com/u/146699003?s=20006&v=4"
-                  />
-                  <MessMenuItemCard
-                    name="Aloo Onion Paratha"
-                    image="https://avatars.githubusercontent.com/u/146699003?s=20006&v=4"
-                  />
-                </View>
-              );
-            }}
-          />
-        </List.Accordion>
-        <List.Accordion title="Lunch" id={2}>
-          <List.Item title=""></List.Item>
-        </List.Accordion>
-        <List.Accordion title="Snacks" id={3}>
-          <List.Item title=""></List.Item>
-        </List.Accordion>
-        <List.Accordion title="Dinner" id={4}>
-          <List.Item title=""></List.Item>
-        </List.Accordion>
-      </List.AccordionGroup>
-    </ScrollView>
+    <>
+      {mess.menu ? (
+        <Tab.Navigator
+          backBehavior="none"
+          initialRouteName={`${day.charAt(0).toUpperCase()}${day.slice(
+            1
+          )}MessMenu`}
+        >
+          <Tab.Screen name="MondayMessMenu" options={{ title: "M" }}>
+            {() => (
+              <DayMessMenuDisplay
+                menu={mess.menu.monday}
+                timings={mess.timings}
+                expandedAccordionId={computeCurrentMealId(mess.timings)}
+              />
+            )}
+          </Tab.Screen>
+          <Tab.Screen name="TuesdayMessMenu" options={{ title: "T" }}>
+            {() => (
+              <DayMessMenuDisplay
+                menu={mess.menu.tuesday}
+                timings={mess.timings}
+                expandedAccordionId={computeCurrentMealId(mess.timings)}
+              />
+            )}
+          </Tab.Screen>
+          <Tab.Screen name="WednesdayMessMenu" options={{ title: "W" }}>
+            {() => (
+              <DayMessMenuDisplay
+                menu={mess.menu.wednesday}
+                timings={mess.timings}
+                expandedAccordionId={computeCurrentMealId(mess.timings)}
+              />
+            )}
+          </Tab.Screen>
+          <Tab.Screen name="ThursdayMessMenu" options={{ title: "Th" }}>
+            {() => (
+              <DayMessMenuDisplay
+                menu={mess.menu.thursday}
+                timings={mess.timings}
+                expandedAccordionId={computeCurrentMealId(mess.timings)}
+              />
+            )}
+          </Tab.Screen>
+          <Tab.Screen name="FridayMessMenu" options={{ title: "F" }}>
+            {() => (
+              <DayMessMenuDisplay
+                menu={mess.menu.friday}
+                timings={mess.timings}
+                expandedAccordionId={computeCurrentMealId(mess.timings)}
+              />
+            )}
+          </Tab.Screen>
+          <Tab.Screen name="SaturdayMessMenu" options={{ title: "S" }}>
+            {() => (
+              <DayMessMenuDisplay
+                menu={mess.menu.saturday}
+                timings={mess.timings}
+                expandedAccordionId={computeCurrentMealId(mess.timings)}
+              />
+            )}
+          </Tab.Screen>
+          <Tab.Screen name="SundayMessMenu" options={{ title: "S" }}>
+            {() => (
+              <DayMessMenuDisplay
+                menu={mess.menu.sunday}
+                timings={mess.timings}
+                expandedAccordionId={computeCurrentMealId(mess.timings)}
+              />
+            )}
+          </Tab.Screen>
+        </Tab.Navigator>
+      ) : (
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "#ffffff",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text>Menu not available for this mess</Text>
+        </View>
+      )}
+    </>
   );
 };
