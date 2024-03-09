@@ -1,21 +1,32 @@
-import { View, Text, Image, StyleSheet, Pressable } from "react-native";
 import {
-  ActivityIndicator,
-  Button,
-  Icon,
-  ProgressBar,
-  Snackbar,
-} from "react-native-paper";
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  Pressable,
+  useColorScheme,
+  Dimensions,
+} from "react-native";
+import { ActivityIndicator, Button } from "react-native-paper";
 import { maybeCompleteAuthSession } from "expo-web-browser";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { StackActions, useNavigation } from "@react-navigation/native";
-import { useGoogleSignIn } from "../services/auth/googleSignIn";
+import { useGoogleSignIn } from "../services/auth/google";
 import { useAppDispatch } from "../services/app/hooks";
 import { setUserStorage } from "../services/app/features/user";
+import Animated, {
+  FadeIn,
+  FadeOut,
+  SlideInUp,
+  SlideOutDown,
+  SlideOutLeft,
+} from "react-native-reanimated";
 
 maybeCompleteAuthSession();
 
 export const WelcomeScreen = () => {
+  const colorScheme = useColorScheme();
+
   const navigation = useNavigation();
 
   const { startGoogleSignIn, userInfo, isLoading, isSuccess, isError, error } =
@@ -52,39 +63,37 @@ export const WelcomeScreen = () => {
   }, [isSuccess]);
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: "#ffffff",
-        alignItems: "center",
-        // justifyContent: "center",
-        paddingTop: "25%",
-        justifyContent: "space-between",
-        paddingBottom: "11%",
-      }}
+    <Animated.View
+      style={[
+        styles.container,
+        colorScheme === "light"
+          ? { backgroundColor: "#ffffff" }
+          : { backgroundColor: "#212121" },
+      ]}
+      entering={FadeIn}
     >
-      <View style={{ alignItems: "center", justifyContent: "center" }}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-          }}
-        >
-          <Image
-            style={{ width: 40, height: 40, marginRight: 10 }}
-            source={require("../assets/icon.png")}
-          />
-          <Text style={styles.title}>InsIIT</Text>
+      <View style={styles.brandContainer}>
+        <View style={styles.titleContainer}>
+          <Image style={styles.logo} source={require("../assets/icon.png")} />
+          <Text
+            style={[
+              styles.title,
+              colorScheme === "light"
+                ? { color: "#000000" }
+                : { color: "#ffffffe0" },
+            ]}
+          >
+            InsIIT
+          </Text>
         </View>
 
         <Text
-          style={{
-            marginTop: 7,
-            fontSize: 17,
-            // textDecorationLine: "underline",
-            // fontWeight: "500",
-            // fontStyle: "italic",
-          }}
+          style={[
+            styles.subtitle,
+            colorScheme === "light"
+              ? { color: "#000000" }
+              : { color: "#ffffffe6" },
+          ]}
         >
           All Things IITGN
         </Text>
@@ -92,91 +101,138 @@ export const WelcomeScreen = () => {
 
       <Image
         style={styles.image}
-        source={require("../assets/welcome-screen.gif")}
+        source={
+          colorScheme === "light"
+            ? require("../assets/welcome-screen-light.gif")
+            : require("../assets/welcome-screen-dark.png")
+        }
       />
 
-      <View
-        style={{ marginBottom: "15%", width: "100%", alignItems: "center" }}
-      >
+      <View style={styles.buttonContainer}>
         <Pressable
-          style={styles.loginButton}
+          style={[
+            styles.loginButton,
+            colorScheme === "light"
+              ? {
+                  backgroundColor: "#000000",
+                  borderColor: "#000000",
+                }
+              : {
+                  backgroundColor: "#ffffffe6",
+                  borderColor: "#ffffffe6",
+                },
+          ]}
           onPress={() => {
             startGoogleSignIn();
           }}
         >
           {!isLoading ? (
             <Image
-              source={require("../assets/google-logo-transparent.png")}
-              style={{ width: 25, height: 25, marginRight: 15 }}
+              source={require("../assets/icons-light/google_logo_transparent.png")}
+              style={styles.googleLogo}
             />
           ) : (
             <ActivityIndicator
               size="small"
-              color="#000000"
-              style={{ marginRight: 15 }}
+              color={colorScheme === "light" ? "#ffffff" : "#000000"}
+              style={styles.loadingIndicator}
             />
           )}
 
-          <Text style={styles.loginButtonText}>Sign In with Google</Text>
+          <Text
+            style={[
+              styles.loginButtonText,
+              colorScheme === "light"
+                ? { color: "#ffffff" }
+                : { color: "#000000" },
+            ]}
+          >
+            Sign In with Google
+          </Text>
         </Pressable>
 
         <Button
           mode="text"
-          textColor="#626262"
+          rippleColor="transparent"
           onPress={() => {
             navigation.dispatch(StackActions.replace("TabNav"));
           }}
-          style={{ marginTop: "2%" }}
+          style={styles.skipButton}
         >
-          <Text style={{ fontSize: 13 }}>SKIP</Text>
+          <Text
+            style={[
+              styles.skipButtonText,
+              colorScheme === "light"
+                ? { color: "#626262" }
+                : { color: "#ffffffc9" },
+            ]}
+          >
+            SKIP
+          </Text>
         </Button>
       </View>
 
-      <Text style={{ fontSize: 14 }}>
+      <Text
+        style={[
+          styles.footerText,
+          colorScheme === "light"
+            ? { color: "#000000" }
+            : { color: "#ffffffe6" },
+        ]}
+      >
         Made with ❤️ by Metis, IIT Gandhinagar
       </Text>
-    </View>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: "#ffffff", flex: 1, paddingTop: "25%" },
-  image: {
-    width: "90%",
-    height: 300,
-  },
-  imageContainer: {
+  container: {
+    flex: 1,
     alignItems: "center",
-    marginBottom: "6%",
+    // justifyContent: "center",
+    paddingTop: "25%",
+    justifyContent: "space-between",
+    paddingBottom: "11%",
   },
-  textContainer: {
-    marginTop: 10,
-    marginLeft: 20,
+  brandContainer: { alignItems: "center", justifyContent: "center" },
+  titleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
+  logo: { width: 40, height: 40, marginRight: 10 },
   title: {
     fontSize: 35,
     fontWeight: "bold",
   },
   subtitle: {
-    fontSize: 20,
-    marginTop: 10,
-    fontStyle: "italic",
+    marginTop: 7,
+    fontSize: 17,
+    // textDecorationLine: "underline",
+    // fontWeight: "500",
+    // fontStyle: "italic",
   },
-  text: {
-    fontSize: 15,
-    marginTop: 10,
+  image: {
+    width: "90%",
+    maxWidth: 400,
+    height: Dimensions.get("screen").width * (90 / 100) <= 375 ? 300 : 450,
   },
+  buttonContainer: { marginBottom: "15%", width: "100%", alignItems: "center" },
   loginButton: {
     alignItems: "center",
     justifyContent: "center",
     width: "80%",
-    borderColor: "#000000",
     borderWidth: 1,
-    paddingVertical: 13,
+    paddingVertical: 11,
     flexDirection: "row",
     borderRadius: 100,
   },
   loginButtonText: {
     fontSize: 16,
   },
+  googleLogo: { width: 20, height: 20, marginRight: 15 },
+  loadingIndicator: { marginRight: 15 },
+  skipButton: { marginTop: "2%" },
+  skipButtonText: { fontSize: 13 },
+  footerText: { fontSize: 14 },
 });

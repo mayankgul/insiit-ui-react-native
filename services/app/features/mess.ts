@@ -1,10 +1,93 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { Mess, MessQrState, MessState } from "../../../models/mess.model";
+import {
+  Mess,
+  MessQrState,
+  MessState,
+  MessTimings,
+} from "../../../models/mess.model";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   PATH_TO_MESS_LOCAL_STORAGE,
   PATH_TO_MESS_QR_LOCALSTORAGE,
 } from "../../../models/constants";
+
+/**
+ * Returns ID (1, 2, 3 or 4) corresponding to current meal according to local time
+ * @param  {MessTimings} timings The timings object
+ * @returns {number}              ID corresponding to current meal
+ */
+export const computeCurrentMealId = (timings: MessTimings): 1 | 2 | 3 | 4 => {
+  const current = new Date();
+
+  const breakfastStartTime = new Date(
+    current.getFullYear(),
+    current.getMonth(),
+    current.getDate(),
+    parseInt(timings.breakfast.start.split(":")[0]),
+    parseInt(timings.breakfast.start.split(":")[1])
+  );
+  const breakfastEndTime = new Date(
+    current.getFullYear(),
+    current.getMonth(),
+    current.getDate(),
+    parseInt(timings.breakfast.end.split(":")[0]),
+    parseInt(timings.breakfast.end.split(":")[1])
+  );
+
+  const lunchStartTime = new Date(
+    current.getFullYear(),
+    current.getMonth(),
+    current.getDate(),
+    parseInt(timings.lunch.start.split(":")[0]),
+    parseInt(timings.lunch.start.split(":")[1])
+  );
+  const lunchEndTime = new Date(
+    current.getFullYear(),
+    current.getMonth(),
+    current.getDate(),
+    parseInt(timings.lunch.end.split(":")[0]),
+    parseInt(timings.lunch.end.split(":")[1])
+  );
+
+  const snacksStartTime = new Date(
+    current.getFullYear(),
+    current.getMonth(),
+    current.getDate(),
+    parseInt(timings.snacks.start.split(":")[0]),
+    parseInt(timings.snacks.start.split(":")[1])
+  );
+  const snacksEndTime = new Date(
+    current.getFullYear(),
+    current.getMonth(),
+    current.getDate(),
+    parseInt(timings.snacks.end.split(":")[0]),
+    parseInt(timings.snacks.end.split(":")[1])
+  );
+
+  const dinnerStartTime = new Date(
+    current.getFullYear(),
+    current.getMonth(),
+    current.getDate(),
+    parseInt(timings.dinner.start.split(":")[0]),
+    parseInt(timings.dinner.start.split(":")[1])
+  );
+  const dinnerEndTime = new Date(
+    current.getFullYear(),
+    current.getMonth(),
+    current.getDate(),
+    parseInt(timings.dinner.end.split(":")[0]),
+    parseInt(timings.dinner.end.split(":")[1])
+  );
+
+  if (current >= breakfastStartTime && current <= breakfastEndTime) return 1;
+  if (current >= lunchStartTime && current <= lunchEndTime) return 2;
+  if (current >= snacksStartTime && current <= snacksEndTime) return 3;
+  if (current >= dinnerStartTime && current <= dinnerEndTime) return 4;
+  if (current >= breakfastEndTime && current <= lunchStartTime) return 2;
+  if (current >= lunchEndTime && current <= snacksStartTime) return 3;
+  if (current >= snacksEndTime && current <= dinnerStartTime) return 4;
+  if (current >= dinnerEndTime && current <= breakfastStartTime) return 1;
+};
 
 const messInitialState: MessState = {
   loading: null,
